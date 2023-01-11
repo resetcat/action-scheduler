@@ -16,3 +16,4 @@ Have java installed on your system. You can download it here https://www.java.co
    seconds}`
 4. To change execution times you need to go to `src/main/resources/` from the root folder and open file `schedule.
    csv` with any text editor.
+---
