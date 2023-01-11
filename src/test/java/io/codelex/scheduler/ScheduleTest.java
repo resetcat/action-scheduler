@@ -1,6 +1,6 @@
 package io.codelex.scheduler;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileWriter;
@@ -10,22 +10,24 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.codelex.scheduler.SchedulerService.CSV_PATH;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ScheduleTest {
 
-    private final SchedulerService schedulerService = new SchedulerService();
+    private static final SchedulerService SCHEDULER_SERVICE = new SchedulerService();
     private static List<Schedule> schedules = new ArrayList<>();
 
-    @org.junit.Test
-    @Before
-    public void testGetSchedulesFromCsv() throws IOException {
-        try (FileWriter writer = new FileWriter(CSV_PATH)) {
+    public static final String PATH = "src/test/java/io/codelex/scheduler/scheduleTest.csv";
+
+    @BeforeAll
+    public static void testGetSchedulesFromCsv() {
+        try (FileWriter writer = new FileWriter(PATH)) {
             writer.write("09:00,5\n10:00,6\n11:00,7");
+        } catch (IOException e) {
+            System.err.println("Couldn't read path: " + PATH);
         }
-        schedules = schedulerService.getSchedulesFromCsv();
+        schedules = SCHEDULER_SERVICE.getSchedulesFromCsv(PATH);
     }
 
     @Test
@@ -54,18 +56,18 @@ public class ScheduleTest {
 
     @Test
     public void testIsDayValid() {
-        assertTrue(schedulerService.isDayValid(schedules.get(0).bitmask(), DayOfWeek.WEDNESDAY));
-        assertTrue(schedulerService.isDayValid(schedules.get(0).bitmask(), DayOfWeek.MONDAY));
-        assertFalse(schedulerService.isDayValid(schedules.get(0).bitmask(), DayOfWeek.TUESDAY));
-        assertFalse(schedulerService.isDayValid(schedules.get(0).bitmask(), DayOfWeek.SUNDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(0).bitmask(), DayOfWeek.WEDNESDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(0).bitmask(), DayOfWeek.MONDAY));
+        assertFalse(SCHEDULER_SERVICE.isDayValid(schedules.get(0).bitmask(), DayOfWeek.TUESDAY));
+        assertFalse(SCHEDULER_SERVICE.isDayValid(schedules.get(0).bitmask(), DayOfWeek.SUNDAY));
 
-        assertTrue(schedulerService.isDayValid(schedules.get(1).bitmask(), DayOfWeek.WEDNESDAY));
-        assertTrue(schedulerService.isDayValid(schedules.get(1).bitmask(), DayOfWeek.TUESDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(1).bitmask(), DayOfWeek.WEDNESDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(1).bitmask(), DayOfWeek.TUESDAY));
 
-        assertTrue(schedulerService.isDayValid(schedules.get(2).bitmask(), DayOfWeek.TUESDAY));
-        assertTrue(schedulerService.isDayValid(schedules.get(2).bitmask(), DayOfWeek.WEDNESDAY));
-        assertFalse(schedulerService.isDayValid(schedules.get(2).bitmask(), DayOfWeek.FRIDAY));
-        assertFalse(schedulerService.isDayValid(schedules.get(2).bitmask(), DayOfWeek.SATURDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(2).bitmask(), DayOfWeek.TUESDAY));
+        assertTrue(SCHEDULER_SERVICE.isDayValid(schedules.get(2).bitmask(), DayOfWeek.WEDNESDAY));
+        assertFalse(SCHEDULER_SERVICE.isDayValid(schedules.get(2).bitmask(), DayOfWeek.FRIDAY));
+        assertFalse(SCHEDULER_SERVICE.isDayValid(schedules.get(2).bitmask(), DayOfWeek.SATURDAY));
     }
 
 
