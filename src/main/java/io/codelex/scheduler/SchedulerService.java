@@ -1,5 +1,6 @@
 package io.codelex.scheduler;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class SchedulerService {
     static final String CSV_PATH = "src/main/resources/schedule.csv";
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(
             "HH" + ":mm");
+    @Value("${fixed.delay.seconds}")
+    private long fixedDelaySeconds;
 
     @Scheduled(fixedRateString = "${fixed.delay.seconds}000")
     public void runScheduler() {
@@ -27,12 +30,16 @@ public class SchedulerService {
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Africa/Lagos"));
         DayOfWeek currentDay = currentTime.getDayOfWeek();
         schedules.stream()
-                 .filter(s -> s.time()
-                               .toString()
-                               .equals(currentTime.toLocalTime().format(timeFormatter)) &&
+                 .filter(s -> isTimeValid(s.time(), currentTime) &&
                          isDayValid(s.bitmask(), currentDay))
                  .findFirst()
                  .ifPresent(s -> successMessage(s.time()));
+    }
+
+    private boolean isTimeValid(LocalTime time, LocalDateTime currentTime) {
+        LocalTime endTime = time.plusSeconds(fixedDelaySeconds);
+        LocalTime normalTime = currentTime.toLocalTime();
+        return normalTime.isAfter(time) && normalTime.isBefore(endTime);
     }
 
     private void successMessage(LocalTime time) {
@@ -53,7 +60,7 @@ public class SchedulerService {
                 schedules.add(new Schedule(LocalTime.parse(parts[0], timeFormatter),
                                            Integer.parseInt(parts[1])));
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Couldn't read path: " + path);
         }
         return schedules;
